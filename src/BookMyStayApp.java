@@ -1,71 +1,44 @@
 import java.util.*;
-class Reservation {
-    String guestName;
-    String roomType;
-    public Reservation(String guestName, String roomType) {
-        this.guestName = guestName;
-        this.roomType = roomType;
+class AddOnService {
+    private String name;
+    private double cost;
+    public AddOnService(String name, double cost) {
+        this.name = name;
+        this.cost = cost;
+    }
+    public double getCost() {
+        return cost;
+    }
+    public String getName() {
+        return name;
     }
 }
-class RoomInventory {
-    private HashMap<String, Integer> inventory = new HashMap<>();
-    public RoomInventory() {
-        inventory.put("Single", 5);
-        inventory.put("Double", 3);
-        inventory.put("Suite", 2);
+class AddOnServiceManager {
+    private Map<String, List<AddOnService>> serviceMap = new HashMap<>();
+    public void addService(String reservationId, AddOnService service) {
+        serviceMap.putIfAbsent(reservationId, new ArrayList<>());
+        serviceMap.get(reservationId).add(service);
     }
-    public int getAvailability(String type) {
-        return inventory.getOrDefault(type, 0);
-    }
-    public void decrement(String type) {
-        inventory.put(type, inventory.get(type) - 1);
-    }
-}
-class BookingService {
-    private Queue<Reservation> queue;
-    private RoomInventory inventory;
-    private HashMap<String, Set<String>> allocatedRooms = new HashMap<>();
-    public BookingService(Queue<Reservation> queue, RoomInventory inventory) {
-        this.queue = queue;
-        this.inventory = inventory;
-        allocatedRooms.put("Single", new HashSet<>());
-        allocatedRooms.put("Double", new HashSet<>());
-        allocatedRooms.put("Suite", new HashSet<>());
-    }
-    public void processBookings() {
-        System.out.println("Room Allocation Processing");
-        while (!queue.isEmpty()) {
-            Reservation request = queue.poll();
-            String type = request.roomType;
-            if (inventory.getAvailability(type) > 0) {
-                int roomNumber = allocatedRooms.get(type).size() + 1;
-                String roomId = type + "-" + roomNumber;
-                allocatedRooms.get(type).add(roomId);
-                inventory.decrement(type);
-                System.out.println(
-                        "Booking confirmed for Guest: "
-                                + request.guestName
-                                + ", Room ID: "
-                                + roomId
-                );
-            } else {
-                System.out.println(
-                        "Booking failed for Guest: "
-                                + request.guestName
-                                + " (No rooms available)"
-                );
+    public double calculateTotalCost(String reservationId) {
+        double total = 0;
+        List<AddOnService> services = serviceMap.get(reservationId);
+        if (services != null) {
+            for (AddOnService s : services) {
+                total += s.getCost();
             }
         }
+        return total;
     }
 }
 public class BookMyStayApp {
     public static void main(String[] args) {
-        Queue<Reservation> requestQueue = new LinkedList<>();
-        requestQueue.add(new Reservation("Abhi", "Single"));
-        requestQueue.add(new Reservation("Subha", "Single"));
-        requestQueue.add(new Reservation("Vanmathi", "Suite"));
-        RoomInventory inventory = new RoomInventory();
-        BookingService service = new BookingService(requestQueue, inventory);
-        service.processBookings();
+        String reservationId = "Single-1";
+        AddOnServiceManager manager = new AddOnServiceManager();
+        manager.addService(reservationId, new AddOnService("Breakfast", 500));
+        manager.addService(reservationId, new AddOnService("Airport Pickup", 1000));
+        double totalCost = manager.calculateTotalCost(reservationId);
+        System.out.println("Add-On Service Selection");
+        System.out.println("Reservation ID: " + reservationId);
+        System.out.println("Total Add-On Cost: " + totalCost);
     }
 }
