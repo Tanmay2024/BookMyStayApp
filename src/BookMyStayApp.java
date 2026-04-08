@@ -1,44 +1,46 @@
 import java.util.*;
-class AddOnService {
-    private String name;
-    private double cost;
-    public AddOnService(String name, double cost) {
-        this.name = name;
-        this.cost = cost;
+class Reservation {
+    private String guestName;
+    private String roomType;
+    public Reservation(String guestName, String roomType) {
+        this.guestName = guestName;
+        this.roomType = roomType;
     }
-    public double getCost() {
-        return cost;
+    public String getGuestName() {
+        return guestName;
     }
-    public String getName() {
-        return name;
+    public String getRoomType() {
+        return roomType;
     }
 }
-class AddOnServiceManager {
-    private Map<String, List<AddOnService>> serviceMap = new HashMap<>();
-    public void addService(String reservationId, AddOnService service) {
-        serviceMap.putIfAbsent(reservationId, new ArrayList<>());
-        serviceMap.get(reservationId).add(service);
+class BookingHistory {
+    private List<Reservation> history = new ArrayList<>();
+    public void addReservation(Reservation reservation) {
+        history.add(reservation);
     }
-    public double calculateTotalCost(String reservationId) {
-        double total = 0;
-        List<AddOnService> services = serviceMap.get(reservationId);
-        if (services != null) {
-            for (AddOnService s : services) {
-                total += s.getCost();
-            }
+    public List<Reservation> getAllBookings() {
+        return history;
+    }
+}
+class BookingReportService {
+    public void generateReport(List<Reservation> bookings) {
+        System.out.println("Booking History and Reporting\n");
+        System.out.println("Booking History Report\n");
+        for (Reservation r : bookings) {
+            System.out.println(
+                    "Guest: " + r.getGuestName() +
+                            ", Room Type: " + r.getRoomType()
+            );
         }
-        return total;
     }
 }
 public class BookMyStayApp {
     public static void main(String[] args) {
-        String reservationId = "Single-1";
-        AddOnServiceManager manager = new AddOnServiceManager();
-        manager.addService(reservationId, new AddOnService("Breakfast", 500));
-        manager.addService(reservationId, new AddOnService("Airport Pickup", 1000));
-        double totalCost = manager.calculateTotalCost(reservationId);
-        System.out.println("Add-On Service Selection");
-        System.out.println("Reservation ID: " + reservationId);
-        System.out.println("Total Add-On Cost: " + totalCost);
+        BookingHistory history = new BookingHistory();
+        history.addReservation(new Reservation("Abhi", "Single"));
+        history.addReservation(new Reservation("Subha", "Double"));
+        history.addReservation(new Reservation("Vanmathi", "Suite"));
+        BookingReportService reportService = new BookingReportService();
+        reportService.generateReport(history.getAllBookings());
     }
 }
